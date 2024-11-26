@@ -1,0 +1,316 @@
+//input
+MACRO
+SUBTRACT &X, &Y
+MOVER AREG, &X
+SUB AREG, ='5'
+MOVER BREG, &Y
+SUB BREG, ='3'
+MEND
+
+START 200
+SUBTRACT 20, 30
+END
+
+
+//macro 1
+  #include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+#define MAX_LINE_LENGTH 256
+#define MAX_MDT_LINES 100
+#define MAX_MNT_LINES 100
+
+void writeMDT(char mdt[MAX_MDT_LINES][MAX_LINE_LENGTH], int mdtCount) {
+    FILE *outFile = fopen("MDT.txt", "w");
+    int i;
+    if (outFile == NULL) {
+        printf("Unable to open MDT file for writing.\n");
+        return;
+    }
+    for (i = 0; i < mdtCount; i++) {
+        fprintf(outFile, "%s", mdt[i]);
+    }
+    fclose(outFile);
+    printf("MDT written to MDT.txt\n");
+}
+
+void writeMNT(char mnt[MAX_MNT_LINES][MAX_LINE_LENGTH], int mntCount) {
+    FILE *outFile = fopen("MNT.txt", "w");
+    int i;
+    if (outFile == NULL) {
+        printf("Unable to open MNT file for writing.\n");
+        return;
+    }
+    for (i = 0; i < mntCount; i++) {
+        fprintf(outFile, "%s", mnt[i]);
+    }
+    fclose(outFile);
+    printf("MNT written to MNT.txt\n");
+}
+
+void writeIntermediateFile(char lines[][MAX_LINE_LENGTH], int startLine, int totalLines) {
+    FILE *intermediateFile = fopen("Intermediatecodemacro.txt", "w");
+    int i;
+    if (intermediateFile == NULL) {
+        printf("Unable to open Intermediate file for writing.\n");
+        return;
+    }
+    for (i = startLine; i < totalLines; i++) {
+        fprintf(intermediateFile, "%s", lines[i]);
+    }
+    fclose(intermediateFile);
+    printf("Intermediate code written to Intermediatecodemacro.txt\n");
+}
+
+void writeALT(char alt[MAX_MNT_LINES][MAX_LINE_LENGTH], int altCount) {
+    FILE *altFile = fopen("ALT.txt", "w");
+    int i;
+    if (altFile == NULL) {
+        printf("Unable to open ALT file for writing.\n");
+        return;
+    }
+    for (i = 0; i < altCount; i++) {
+        fprintf(altFile, "%s", alt[i]);
+    }
+    fclose(altFile);
+    printf("ALT written to ALT.txt\n");
+}
+
+void processMacros(const char *inputFileName) {
+    FILE *inFile = fopen(inputFileName, "r");
+    if (inFile == NULL) {
+        printf("Unable to open input file.\n");
+        return;
+    }
+
+    char line[MAX_LINE_LENGTH];
+    char mdt[MAX_MDT_LINES][MAX_LINE_LENGTH];
+    char mnt[MAX_MNT_LINES][MAX_LINE_LENGTH];
+    char alt[MAX_MNT_LINES][MAX_LINE_LENGTH];
+    char allLines[MAX_MNT_LINES][MAX_LINE_LENGTH];
+    
+    int mdtIndex = 1;
+    int mdtCount = 0;
+    int mntCount = 0;
+    int altCount = 0;
+    int lineCount = 0;
+    int lastMendLine = -1;
+
+    while (fgets(line, sizeof(line), inFile)) {
+        snprintf(allLines[lineCount++], MAX_LINE_LENGTH, "%s", line);
+
+        if (strstr(line, "MACRO") != NULL) {
+            
+            int argumentIndex = 1;
+            if (fgets(line, sizeof(line), inFile)) {
+                snprintf(allLines[lineCount++], MAX_LINE_LENGTH, "%s", line);
+
+                char macroName[MAX_LINE_LENGTH];
+                sscanf(line, "%s", macroName);
+                snprintf(mnt[mntCount++], MAX_LINE_LENGTH, "%d   %s\n", mdtIndex, macroName);
+                snprintf(mdt[mdtCount++], MAX_LINE_LENGTH, "%d   %s", mdtIndex++, line);
+
+                while (fgets(line, sizeof(line), inFile)) {
+                    snprintf(allLines[lineCount++], MAX_LINE_LENGTH, "%s", line);
+                    if (strstr(line, "MEND") != NULL) {
+                        snprintf(mdt[mdtCount++], MAX_LINE_LENGTH, "%d   %s", mdtIndex++, line);
+                        lastMendLine = lineCount;
+                        break;
+                    }
+
+                    char tempLine[MAX_LINE_LENGTH];
+                    strcpy(tempLine, line);
+                    char *token = strtok(tempLine, " ,");
+                    while (token != NULL) {
+                        if (token[0] == '&') {
+                            
+                            snprintf(alt[altCount++], MAX_LINE_LENGTH, "%d   %s\n", argumentIndex++, token);
+                            char indexedParam[MAX_LINE_LENGTH];
+                            snprintf(indexedParam, sizeof(indexedParam), "#%d", argumentIndex - 1);
+                            char *pos = strstr(line, token);
+                            if (pos != NULL) {
+                                
+                                strncpy(pos, indexedParam, strlen(indexedParam));
+                            }
+                        }
+                        token = strtok(NULL, " ,");
+                    }
+                    snprintf(mdt[mdtCount++], MAX_LINE_LENGTH, "%d   %s", mdtIndex++, line);
+                }
+            }
+        }
+    }
+    fclose(inFile);
+
+    writeMDT(mdt, mdtCount);
+    writeMNT(mnt, mntCount);
+    writeALT(alt, altCount);
+
+    if (lastMendLine != -1 && lastMendLine < lineCount) {
+        writeIntermediateFile(allLines, lastMendLine, lineCount);
+    } else {
+        printf("No intermediate code found after the last MEND.\n");
+    }
+}
+
+int main() {
+    const char *inputFileName = "input.txt";
+    processMacros(inputFileName);
+    return 0;
+}
+
+
+
+
+//macro 2
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+#define MAX_LINE_LENGTH 256
+#define MAX_MDT_LINES 100
+#define MAX_MNT_LINES 100
+#define MAX_ALT_LINES 10 
+#define MAX_EXPANDED_LINES 500
+
+void readFileToArray(const char *fileName, char array[][MAX_LINE_LENGTH], int *count) {
+    FILE *file = fopen(fileName, "r");
+    if (file == NULL) {
+        printf("Unable to open file: %s\n", fileName);
+        return;
+    }
+    char line[MAX_LINE_LENGTH];
+    *count = 0;
+    while (fgets(line, sizeof(line), file)) {
+        strcpy(array[(*count)++], line);
+    }
+    fclose(file);
+}
+
+void writeExpandedCode(char expanded[MAX_EXPANDED_LINES][MAX_LINE_LENGTH], int expandedCount) {
+    FILE *outFile = fopen("ExpandedCode.txt", "w");
+    int i;
+    if (outFile == NULL) {
+        printf("Unable to open ExpandedCode file for writing.\n");
+        return;
+    }
+    for (i = 0; i < expandedCount; i++) {
+        fprintf(outFile, "%s", expanded[i]);
+    }
+    fclose(outFile);
+    printf("Expanded code written to ExpandedCode.txt\n");
+}
+
+int findMacroDefinition(char mnt[MAX_MNT_LINES][MAX_LINE_LENGTH], int mntCount, const char *macroName) {
+    int i;
+    for (i = 0; i < mntCount; i++) {
+        char name[MAX_LINE_LENGTH];
+        int mdtIndex;
+        sscanf(mnt[i], "%d %s", &mdtIndex, name);
+        if (strcmp(name, macroName) == 0) {
+            return mdtIndex;
+        }
+    }
+    return -1;
+}
+
+void substituteArguments(char *line, char actualArgs[MAX_ALT_LINES][MAX_LINE_LENGTH], int actualArgCount) {
+    char placeholder[MAX_LINE_LENGTH];
+    int i;
+    
+    for (i = 0; i < actualArgCount; i++) {
+        sprintf(placeholder, "#%d", i + 1);  // Arguments are #1, #2, etc.
+        char *pos = strstr(line, placeholder);
+        while (pos != NULL) {
+            char temp[MAX_LINE_LENGTH];
+            strncpy(temp, line, pos - line);
+            temp[pos - line] = '\0';
+            strcat(temp, actualArgs[i]);
+            strcat(temp, pos + strlen(placeholder));
+            strcpy(line, temp);
+            pos = strstr(line, placeholder);  // Keep searching for more instances
+        }
+    }
+}
+
+void expandMacro(char mdt[MAX_MDT_LINES][MAX_LINE_LENGTH], int mdtIndex, char actualArgs[MAX_ALT_LINES][MAX_LINE_LENGTH], int actualArgCount, char expanded[MAX_EXPANDED_LINES][MAX_LINE_LENGTH], int *expandedCount) {
+    while (strstr(mdt[mdtIndex], "MEND") == NULL) {
+        char line[MAX_LINE_LENGTH];
+        strcpy(line, mdt[mdtIndex]);
+
+        // Remove the macro name part if needed
+        char *instructionStart = strchr(line, ' ');
+        if (instructionStart != NULL) {
+            strcpy(line, instructionStart + 1);  // Get the part after the macro name
+        }
+
+        // Substitute arguments in this line
+        substituteArguments(line, actualArgs, actualArgCount);
+
+        strcpy(expanded[(*expandedCount)++], line);  // Add the expanded line
+        mdtIndex++;  
+    }
+}
+
+void processPass2(const char *intermediateFileName, char mnt[MAX_MNT_LINES][MAX_LINE_LENGTH], int mntCount, char mdt[MAX_MDT_LINES][MAX_LINE_LENGTH]) {
+    FILE *intermediateFile = fopen(intermediateFileName, "r");
+    if (intermediateFile == NULL) {
+        printf("Unable to open intermediate file.\n");
+        return;
+    }
+
+    char expanded[MAX_EXPANDED_LINES][MAX_LINE_LENGTH];
+    int expandedCount = 0;
+    char line[MAX_LINE_LENGTH];
+
+    while (fgets(line, sizeof(line), intermediateFile)) {
+        char macroName[MAX_LINE_LENGTH];
+        int foundMacro = 0;
+
+        
+        sscanf(line, "%s", macroName);
+        int mdtIndex = findMacroDefinition(mnt, mntCount, macroName);
+        if (mdtIndex != -1) {
+            foundMacro = 1;
+
+            
+            char *start = strchr(line, ' ');
+            char actualArgs[MAX_ALT_LINES][MAX_LINE_LENGTH];
+            int actualArgCount = 0;
+            if (start != NULL) {
+                start++;
+                char *token = strtok(start, " ,\n");
+                while (token != NULL) {
+                    strcpy(actualArgs[actualArgCount++], token);
+                    token = strtok(NULL, " ,\n");
+                }
+            }
+
+            expandMacro(mdt, mdtIndex, actualArgs, actualArgCount, expanded, &expandedCount);
+        }
+
+    
+        if (!foundMacro) {
+            strcpy(expanded[expandedCount++], line);
+        }
+    }
+
+    fclose(intermediateFile);
+
+    writeExpandedCode(expanded, expandedCount);
+}
+
+int main() {
+    char mnt[MAX_MNT_LINES][MAX_LINE_LENGTH];
+    char mdt[MAX_MDT_LINES][MAX_LINE_LENGTH];
+
+    int mntCount, mdtCount;
+
+    readFileToArray("MNT.txt", mnt, &mntCount);
+    readFileToArray("MDT.txt", mdt, &mdtCount);
+
+    processPass2("Intermediatecodemacro.txt", mnt, mntCount, mdt);
+
+    return 0;
+}

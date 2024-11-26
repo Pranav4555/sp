@@ -1,0 +1,72 @@
+//input
+MACRO
+SUBTRACT &X, &Y
+MOVER AREG, &X
+SUB AREG, ='5'
+MOVER BREG, &Y
+SUB BREG, ='3'
+MEND
+
+START 200
+SUBTRACT 20, 30
+END
+
+
+
+//code
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+#define MAX_LINE_LENGTH 256
+#define MAX_ALT_LINES 100
+
+int main() {
+    const char *inputFileName = "input.txt";
+    const char *altFileName = "ALT.txt";
+
+    FILE *inFile = fopen(inputFileName, "r");
+    if (inFile == NULL) {
+        printf("Unable to open input file.\n");
+        return 1;
+    }
+
+    char line[MAX_LINE_LENGTH];
+    char alt[MAX_ALT_LINES][MAX_LINE_LENGTH];
+    int altCount = 0;
+
+    while (fgets(line, sizeof(line), inFile)) {
+        if (strstr(line, "MACRO") != NULL) {
+            // Process macro definition line
+            if (fgets(line, sizeof(line), inFile)) {
+                char tempLine[MAX_LINE_LENGTH];
+                strcpy(tempLine, line);
+
+                char *token = strtok(tempLine, " ,\n");
+                int argumentIndex = 1;
+                while (token != NULL) {
+                    if (token[0] == '&') {
+                        snprintf(alt[altCount++], MAX_LINE_LENGTH, "%d   %s\n", argumentIndex++, token);
+                    }
+                    token = strtok(NULL, " ,\n");
+                }
+            }
+        }
+    }
+    fclose(inFile);
+
+    FILE *outFile = fopen(altFileName, "w");
+    if (outFile == NULL) {
+        printf("Unable to open ALT file for writing.\n");
+        return 1;
+    }
+
+    for (int i = 0; i < altCount; i++) {
+        fprintf(outFile, "%s", alt[i]);
+    }
+    fclose(outFile);
+
+    printf("ALT written to ALT.txt\n");
+
+    return 0;
+}
