@@ -1,0 +1,115 @@
+Header:
+Translated Address: 200
+Code Size: 105
+Start Address: 400
+
+Machine Code:
+200 01 5 205    ; PRINTTRIANGLE R=5, S='*'
+201 01 5 206    ; PRINTSQUARE H=5, E='*'
+202 01 5 207    ; PRINTDIAMOND R=5, Z='*'
+
+205 05 - -      ; R = 5 (Height of Triangle)
+206 05 - -      ; H = 5 (Size of Square)
+207 05 - -      ; R = 5 (Height of Diamond)
+208 42 - -      ; S = '*' (Symbol for Triangle)
+209 42 - -      ; E = '*' (Symbol for Square)
+210 42 - -      ; Z = '*' (Symbol for Diamond)
+
+300 08 - 208    ; PRINT_CHAR '*'
+301 09 1 -      ; PRINT_SPACES COUNT=1
+302 10 5 -      ; PRINT_STARS COUNT=5
+303 11 5 -      ; PRINT_TRIANGLE HEIGHT=5
+304 12 5 -      ; PRINT_SQUARE SIZE=5
+305 13 5 -      ; PRINT_DIAMOND HEIGHT=5
+
+400 01 - -      ; ONE = 1
+401 02 - -      ; TWO = 2
+END
+
+Relocation Table:
+Original Address     Relocation Factor    translated Address   Instruction
+--------------------------------------------------------------------------------
+200                  200                  400                            START 200                 ; Starting address for the main program
+201                  200                  401                  MACRO PRINT_CHAR CHAR
+202                  200                  402                      MOV R0, CHAR               ; Load the character into R0
+203                  200                  403                      OUT R0                     ; Output the character
+204                  200                  404                  MEND
+205                  200                  405                  MACRO PRINT_SPACES COUNT=1
+206                  200                  406                      MOV R3, COUNT              ; Load the number of spaces into register R3
+207                  200                  407                  PRINT_SPACES_LOOP:
+208                  200                  408                      CMP R3, 0                  ; Compare R3 with 0 (end condition)
+209                  200                  409                      JE END_PRINT_SPACES         ; Jump to end if R3 is 0
+210                  200                  410                      PRINT_CHAR ' '              ; Print one space using PRINT_CHAR
+211                  200                  411                      DEC R3                      ; Decrement the space counter
+212                  200                  412                      JMP PRINT_SPACES_LOOP       ; Repeat the loop
+213                  200                  413                  END_PRINT_SPACES:
+214                  200                  414                  MEND
+215                  200                  415                  MACRO PRINT_STARS COUNT=1
+216                  200                  416                      MOV R3, COUNT              ; Load the number of stars into register R3
+217                  200                  417                  PRINT_STARS_LOOP:
+218                  200                  418                      CMP R3, 0                  ; Compare R3 with 0 (end condition)
+219                  200                  419                      JE END_PRINT_STARS          ; Jump to end if R3 is 0
+220                  200                  420                      PRINT_CHAR '*'              ; Print one star using PRINT_CHAR
+221                  200                  421                      DEC R3                      ; Decrement the star counter
+222                  200                  422                      JMP PRINT_STARS_LOOP        ; Repeat the loop
+223                  200                  423                  END_PRINT_STARS:
+224                  200                  424                  MEND
+225                  200                  425                  MACRO PRINT_TRIANGLE HEIGHT=5
+226                  200                  426                      MOV R1, 1                   ; Start from the first row (R1 = current row)
+227                  200                  427                      MOV R2, HEIGHT              ; Store the height in R2 (R2 = total height)
+228                  200                  428                  TRIANGLE_LOOP:
+229                  200                  429                      MOV R4, R2                  ; Copy height to R4
+230                  200                  430                      SUB R4, R1                  ; Calculate spaces = height - current row
+231                  200                  431                      PRINT_SPACES COUNT=R4       ; Print spaces before the stars
+232                  200                  432                      PRINT_STARS COUNT=R1        ; Print stars for the current row
+233                  200                  433                      PRINT_CHAR 10               ; Print newline (ASCII code 10)
+234                  200                  434                      INC R1                      ; Move to the next row
+235                  200                  435                      CMP R1, R2                  ; Compare current row with total height
+236                  200                  436                      JLE TRIANGLE_LOOP           ; Repeat the loop until all rows are printed
+237                  200                  437                  MEND
+238                  200                  438                  MACRO PRINT_SQUARE SIZE=5
+239                  200                  439                      MOV R1, 0                   ; Initialize the row counter to 0
+240                  200                  440                  SQUARE_LOOP:
+241                  200                  441                      CMP R1, SIZE                ; Compare row index with the size of the square
+242                  200                  442                      JE END_SQUARE               ; If row index equals size, end the loop
+243                  200                  443                      PRINT_STARS COUNT=SIZE      ; Print a row of stars
+244                  200                  444                      PRINT_CHAR 10               ; Print newline (ASCII code 10)
+245                  200                  445                      INC R1                      ; Increment the row counter
+246                  200                  446                      JMP SQUARE_LOOP             ; Repeat the loop for the next row
+247                  200                  447                  END_SQUARE:
+248                  200                  448                  MEND
+249                  200                  449                  MACRO PRINT_DIAMOND HEIGHT=5
+250                  200                  450                      MOV R1, 1                   ; Start from the first row
+251                  200                  451                      MOV R2, HEIGHT              ; Store the height in R2
+252                  200                  452                  DIAMOND_TOP_LOOP:
+253                  200                  453                      CMP R1, HEIGHT              ; Compare current row with height
+254                  200                  454                      JG DIAMOND_BOTTOM           ; If current row exceeds height, switch to the bottom part
+255                  200                  455                      MOV R4, R2                  ; Copy height to R4
+256                  200                  456                      SUB R4, R1                  ; Calculate spaces = height - current row
+257                  200                  457                      PRINT_SPACES COUNT=R4       ; Print leading spaces for the top part
+258                  200                  458                      MOV R5, R1                  ; Copy row number to R5
+259                  200                  459                      ADD R5, R1                  ; Calculate number of stars: 2 * row - 1
+260                  200                  460                      DEC R5                      ; Subtract 1 for the correct count
+261                  200                  461                      PRINT_STARS COUNT=R5        ; Print stars
+262                  200                  462                      PRINT_CHAR 10               ; Print newline
+263                  200                  463                      INC R1                      ; Move to the next row
+264                  200                  464                      JMP DIAMOND_TOP_LOOP        ; Repeat the loop for the top half
+265                  200                  465                  DIAMOND_BOTTOM:
+266                  200                  466                      DEC R1                      ; Start from the bottom part, decrement row index
+267                  200                  467                  DIAMOND_BOTTOM_LOOP:
+268                  200                  468                      CMP R1, 0                   ; Check if row index has reached 0
+269                  200                  469                      JE END_DIAMOND              ; If so, end the loop
+
+Link Table:
+Symbol               Address              translated Address   Type                
+---------------------------------------------------------------
+PRINT_SPACES_LOOP    207                  407                  PD                  
+END_PRINT_SPACES     213                  413                  PD                  
+PRINT_STARS_LOOP     217                  417                  PD                  
+END_PRINT_STARS      223                  423                  PD                  
+TRIANGLE_LOOP        228                  428                  PD                  
+SQUARE_LOOP          240                  440                  PD                  
+END_SQUARE           247                  447                  PD                  
+DIAMOND_TOP_LOOP     252                  452                  PD                  
+DIAMOND_BOTTOM       265                  465                  PD                  
+DIAMOND_BOTTOM_LOOP  267                  467                  PD                  

@@ -1,0 +1,12 @@
+Symbol               Address              translated Address   Type                
+---------------------------------------------------------------
+PRINT_SPACES_LOOP    207                  -1986423374          PD                  
+END_PRINT_SPACES     213                  -1986423368          PD                  
+PRINT_STARS_LOOP     217                  -1986423364          PD                  
+END_PRINT_STARS      223                  -1986423358          PD                  
+TRIANGLE_LOOP        228                  -1986423353          PD                  
+SQUARE_LOOP          240                  -1986423341          PD                  
+END_SQUARE           247                  -1986423334          PD                  
+DIAMOND_TOP_LOOP     252                  -1986423329          PD                  
+DIAMOND_BOTTOM       265                  -1986423316          PD                  
+DIAMOND_BOTTOM_LOOP  267                  -1986423314          PD                  

@@ -1,0 +1,21 @@
+200 01 5 205    ; PRINTTRIANGLE R=5, S='*'
+201 01 5 206    ; PRINTSQUARE H=5, E='*'
+202 01 5 207    ; PRINTDIAMOND R=5, Z='*'
+
+205 05 - -      ; R = 5 (Height of Triangle)
+206 05 - -      ; H = 5 (Size of Square)
+207 05 - -      ; R = 5 (Height of Diamond)
+208 42 - -      ; S = '*' (Symbol for Triangle)
+209 42 - -      ; E = '*' (Symbol for Square)
+210 42 - -      ; Z = '*' (Symbol for Diamond)
+
+300 08 - 208    ; PRINT_CHAR '*'
+301 09 1 -      ; PRINT_SPACES COUNT=1
+302 10 5 -      ; PRINT_STARS COUNT=5
+303 11 5 -      ; PRINT_TRIANGLE HEIGHT=5
+304 12 5 -      ; PRINT_SQUARE SIZE=5
+305 13 5 -      ; PRINT_DIAMOND HEIGHT=5
+
+400 01 - -      ; ONE = 1
+401 02 - -      ; TWO = 2
+END

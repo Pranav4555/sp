@@ -1,0 +1,72 @@
+Original Address     Relocation Factor    translated Address   Instruction
+--------------------------------------------------------------------------------
+1990626333           -1986423581          4202752                        START 200                 ; Starting address for the main program
+1990626334           -1986423581          4202753              MACRO PRINT_CHAR CHAR
+1990626335           -1986423581          4202754                  MOV R0, CHAR               ; Load the character into R0
+1990626336           -1986423581          4202755                  OUT R0                     ; Output the character
+1990626337           -1986423581          4202756              MEND
+1990626338           -1986423581          4202757              MACRO PRINT_SPACES COUNT=1
+1990626339           -1986423581          4202758                  MOV R3, COUNT              ; Load the number of spaces into register R3
+1990626340           -1986423581          4202759              PRINT_SPACES_LOOP:
+1990626341           -1986423581          4202760                  CMP R3, 0                  ; Compare R3 with 0 (end condition)
+1990626342           -1986423581          4202761                  JE END_PRINT_SPACES         ; Jump to end if R3 is 0
+1990626343           -1986423581          4202762                  PRINT_CHAR ' '              ; Print one space using PRINT_CHAR
+1990626344           -1986423581          4202763                  DEC R3                      ; Decrement the space counter
+1990626345           -1986423581          4202764                  JMP PRINT_SPACES_LOOP       ; Repeat the loop
+1990626346           -1986423581          4202765              END_PRINT_SPACES:
+1990626347           -1986423581          4202766              MEND
+1990626348           -1986423581          4202767              MACRO PRINT_STARS COUNT=1
+1990626349           -1986423581          4202768                  MOV R3, COUNT              ; Load the number of stars into register R3
+1990626350           -1986423581          4202769              PRINT_STARS_LOOP:
+1990626351           -1986423581          4202770                  CMP R3, 0                  ; Compare R3 with 0 (end condition)
+1990626352           -1986423581          4202771                  JE END_PRINT_STARS          ; Jump to end if R3 is 0
+1990626353           -1986423581          4202772                  PRINT_CHAR '*'              ; Print one star using PRINT_CHAR
+1990626354           -1986423581          4202773                  DEC R3                      ; Decrement the star counter
+1990626355           -1986423581          4202774                  JMP PRINT_STARS_LOOP        ; Repeat the loop
+1990626356           -1986423581          4202775              END_PRINT_STARS:
+1990626357           -1986423581          4202776              MEND
+1990626358           -1986423581          4202777              MACRO PRINT_TRIANGLE HEIGHT=5
+1990626359           -1986423581          4202778                  MOV R1, 1                   ; Start from the first row (R1 = current row)
+1990626360           -1986423581          4202779                  MOV R2, HEIGHT              ; Store the height in R2 (R2 = total height)
+1990626361           -1986423581          4202780              TRIANGLE_LOOP:
+1990626362           -1986423581          4202781                  MOV R4, R2                  ; Copy height to R4
+1990626363           -1986423581          4202782                  SUB R4, R1                  ; Calculate spaces = height - current row
+1990626364           -1986423581          4202783                  PRINT_SPACES COUNT=R4       ; Print spaces before the stars
+1990626365           -1986423581          4202784                  PRINT_STARS COUNT=R1        ; Print stars for the current row
+1990626366           -1986423581          4202785                  PRINT_CHAR 10               ; Print newline (ASCII code 10)
+1990626367           -1986423581          4202786                  INC R1                      ; Move to the next row
+1990626368           -1986423581          4202787                  CMP R1, R2                  ; Compare current row with total height
+1990626369           -1986423581          4202788                  JLE TRIANGLE_LOOP           ; Repeat the loop until all rows are printed
+1990626370           -1986423581          4202789              MEND
+1990626371           -1986423581          4202790              MACRO PRINT_SQUARE SIZE=5
+1990626372           -1986423581          4202791                  MOV R1, 0                   ; Initialize the row counter to 0
+1990626373           -1986423581          4202792              SQUARE_LOOP:
+1990626374           -1986423581          4202793                  CMP R1, SIZE                ; Compare row index with the size of the square
+1990626375           -1986423581          4202794                  JE END_SQUARE               ; If row index equals size, end the loop
+1990626376           -1986423581          4202795                  PRINT_STARS COUNT=SIZE      ; Print a row of stars
+1990626377           -1986423581          4202796                  PRINT_CHAR 10               ; Print newline (ASCII code 10)
+1990626378           -1986423581          4202797                  INC R1                      ; Increment the row counter
+1990626379           -1986423581          4202798                  JMP SQUARE_LOOP             ; Repeat the loop for the next row
+1990626380           -1986423581          4202799              END_SQUARE:
+1990626381           -1986423581          4202800              MEND
+1990626382           -1986423581          4202801              MACRO PRINT_DIAMOND HEIGHT=5
+1990626383           -1986423581          4202802                  MOV R1, 1                   ; Start from the first row
+1990626384           -1986423581          4202803                  MOV R2, HEIGHT              ; Store the height in R2
+1990626385           -1986423581          4202804              DIAMOND_TOP_LOOP:
+1990626386           -1986423581          4202805                  CMP R1, HEIGHT              ; Compare current row with height
+1990626387           -1986423581          4202806                  JG DIAMOND_BOTTOM           ; If current row exceeds height, switch to the bottom part
+1990626388           -1986423581          4202807                  MOV R4, R2                  ; Copy height to R4
+1990626389           -1986423581          4202808                  SUB R4, R1                  ; Calculate spaces = height - current row
+1990626390           -1986423581          4202809                  PRINT_SPACES COUNT=R4       ; Print leading spaces for the top part
+1990626391           -1986423581          4202810                  MOV R5, R1                  ; Copy row number to R5
+1990626392           -1986423581          4202811                  ADD R5, R1                  ; Calculate number of stars: 2 * row - 1
+1990626393           -1986423581          4202812                  DEC R5                      ; Subtract 1 for the correct count
+1990626394           -1986423581          4202813                  PRINT_STARS COUNT=R5        ; Print stars
+1990626395           -1986423581          4202814                  PRINT_CHAR 10               ; Print newline
+1990626396           -1986423581          4202815                  INC R1                      ; Move to the next row
+1990626397           -1986423581          4202816                  JMP DIAMOND_TOP_LOOP        ; Repeat the loop for the top half
+1990626398           -1986423581          4202817              DIAMOND_BOTTOM:
+1990626399           -1986423581          4202818                  DEC R1                      ; Start from the bottom part, decrement row index
+1990626400           -1986423581          4202819              DIAMOND_BOTTOM_LOOP:
+1990626401           -1986423581          4202820                  CMP R1, 0                   ; Check if row index has reached 0
+1990626402           -1986423581          4202821                  JE END_DIAMOND              ; If so, end the loop

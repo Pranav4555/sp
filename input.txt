@@ -1,0 +1,122 @@
+          START 200                 ; Starting address for the main program
+
+; -----------------------------
+; Macros
+; -----------------------------
+
+; Macro to print a single character (used by other macros)
+MACRO PRINT_CHAR CHAR
+    MOV R0, CHAR               ; Load the character into R0
+    OUT R0                     ; Output the character
+MEND
+
+; Macro to print spaces
+MACRO PRINT_SPACES COUNT=1
+    MOV R3, COUNT              ; Load the number of spaces into register R3
+PRINT_SPACES_LOOP:
+    CMP R3, 0                  ; Compare R3 with 0 (end condition)
+    JE END_PRINT_SPACES         ; Jump to end if R3 is 0
+    PRINT_CHAR ' '              ; Print one space using PRINT_CHAR
+    DEC R3                      ; Decrement the space counter
+    JMP PRINT_SPACES_LOOP       ; Repeat the loop
+END_PRINT_SPACES:
+MEND
+
+; Macro to print stars
+MACRO PRINT_STARS COUNT=1
+    MOV R3, COUNT              ; Load the number of stars into register R3
+PRINT_STARS_LOOP:
+    CMP R3, 0                  ; Compare R3 with 0 (end condition)
+    JE END_PRINT_STARS          ; Jump to end if R3 is 0
+    PRINT_CHAR '*'              ; Print one star using PRINT_CHAR
+    DEC R3                      ; Decrement the star counter
+    JMP PRINT_STARS_LOOP        ; Repeat the loop
+END_PRINT_STARS:
+MEND
+
+; -----------------------------
+; Macro to print a triangle pattern
+; -----------------------------
+MACRO PRINT_TRIANGLE HEIGHT=5
+    MOV R1, 1                   ; Start from the first row (R1 = current row)
+    MOV R2, HEIGHT              ; Store the height in R2 (R2 = total height)
+
+TRIANGLE_LOOP:
+    MOV R4, R2                  ; Copy height to R4
+    SUB R4, R1                  ; Calculate spaces = height - current row
+    PRINT_SPACES COUNT=R4       ; Print spaces before the stars
+    PRINT_STARS COUNT=R1        ; Print stars for the current row
+    PRINT_CHAR 10               ; Print newline (ASCII code 10)
+    INC R1                      ; Move to the next row
+    CMP R1, R2                  ; Compare current row with total height
+    JLE TRIANGLE_LOOP           ; Repeat the loop until all rows are printed
+MEND
+
+; -----------------------------
+; Macro to print a square pattern
+; -----------------------------
+MACRO PRINT_SQUARE SIZE=5
+    MOV R1, 0                   ; Initialize the row counter to 0
+
+SQUARE_LOOP:
+    CMP R1, SIZE                ; Compare row index with the size of the square
+    JE END_SQUARE               ; If row index equals size, end the loop
+    PRINT_STARS COUNT=SIZE      ; Print a row of stars
+    PRINT_CHAR 10               ; Print newline (ASCII code 10)
+    INC R1                      ; Increment the row counter
+    JMP SQUARE_LOOP             ; Repeat the loop for the next row
+
+END_SQUARE:
+MEND
+
+; -----------------------------
+; Macro to print a diamond pattern
+; -----------------------------
+MACRO PRINT_DIAMOND HEIGHT=5
+    MOV R1, 1                   ; Start from the first row
+    MOV R2, HEIGHT              ; Store the height in R2
+
+DIAMOND_TOP_LOOP:
+    CMP R1, HEIGHT              ; Compare current row with height
+    JG DIAMOND_BOTTOM           ; If current row exceeds height, switch to the bottom part
+
+    MOV R4, R2                  ; Copy height to R4
+    SUB R4, R1                  ; Calculate spaces = height - current row
+    PRINT_SPACES COUNT=R4       ; Print leading spaces for the top part
+    MOV R5, R1                  ; Copy row number to R5
+    ADD R5, R1                  ; Calculate number of stars: 2 * row - 1
+    DEC R5                      ; Subtract 1 for the correct count
+    PRINT_STARS COUNT=R5        ; Print stars
+    PRINT_CHAR 10               ; Print newline
+    INC R1                      ; Move to the next row
+    JMP DIAMOND_TOP_LOOP        ; Repeat the loop for the top half
+
+DIAMOND_BOTTOM:
+    DEC R1                      ; Start from the bottom part, decrement row index
+
+DIAMOND_BOTTOM_LOOP:
+    CMP R1, 0                   ; Check if row index has reached 0
+    JE END_DIAMOND              ; If so, end the loop
+
+    MOV R4, R2                  ; Copy height to R4
+    SUB R4, R1                  ; Calculate spaces = height - current row
+    PRINT_SPACES COUNT=R4       ; Print leading spaces for the bottom part
+    MOV R5, R1                  ; Copy row number to R5
+    ADD R5, R1                  ; Calculate stars: 2 * row - 1
+    DEC R5                      ; Subtract 1 for the correct count
+    PRINT_STARS COUNT=R5        ; Print stars
+    PRINT_CHAR 10               ; Print newline
+    DEC R1                      ; Move to the previous row
+    JMP DIAMOND_BOTTOM_LOOP     ; Repeat the loop for the bottom half
+
+END_DIAMOND:
+MEND
+
+; -----------------------------
+; Main Program to print patterns
+; -----------------------------
+START:
+    PRINT_TRIANGLE HEIGHT=5      ; Print a triangle with height 5
+    PRINT_SQUARE SIZE=5          ; Print a square with size 5
+    PRINT_DIAMOND HEIGHT=5       ; Print a diamond with height 5
+    HLT                          ; Halt the program
